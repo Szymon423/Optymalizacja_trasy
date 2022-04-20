@@ -1,7 +1,8 @@
-import matplotlib.pyplot as plt
+from matplotlib import pyplot
+import matplotlib.image as image
 import numpy as np
 import calculations as calc
-import photo_import as phi
+from PIL import Image, ImageOps
 
 length = 2000
 offset = 250
@@ -21,19 +22,28 @@ Xl, Yl = calc.left_edge(offset, X, Y)
 Xr, Yr = calc.right_edge(offset, X, Y)
 
 
-plt.figure(1)
-plt.plot(X, Y)
-plt.plot(Xl, Yl)
-plt.plot(Xr, Yr)
-plt.xlim([0, length])
-plt.ylim([-500, 500])
+pyplot.figure(1)
+pyplot.plot(X, Y)
+pyplot.plot(Xl, Yl)
+pyplot.plot(Xr, Yr)
+pyplot.xlim([0, length])
+pyplot.ylim([-500, 500])
 
-img = phi.get_img()
+img = Image.open("test_1.jpg")
+
+gray_img = ImageOps.grayscale(img)
+
+d = np.asarray(gray_img)
 
 
+X_vect = np.array([])
+Y_vect = np.array([])
 
+for x,y in d:
+    if d[y, x] == 0:
+        np.append(X_vect, x)
+        np.append(Y_vect, y)
 
-# plt.figure(2)
-#
-# plt.plot(K)
-plt.show()
+print(d.shape[1])
+
+pyplot.show()
