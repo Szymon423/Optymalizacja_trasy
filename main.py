@@ -5,7 +5,7 @@ import calculations as calc
 from PIL import Image, ImageOps
 
 length = 2000
-offset = 250
+offset = 50
 X, Y = calc.generate_route(length)
 
 
@@ -33,17 +33,30 @@ img = Image.open("test_1.jpg")
 
 gray_img = ImageOps.grayscale(img)
 
-d = np.asarray(gray_img)
+print(gray_img.size)
+
+X_vect = np.array([0])
+Y_vect = np.array([], dtype=int)
+
+gray_img_arr = np.asarray(gray_img)
+coll_0 = gray_img_arr[:, 0]
+a = np.where(coll_0 == 0)
+print(a[0][0])
+Y_vect = np.append(Y_vect,a[0][0])
+print(X_vect)
+print(Y_vect)
+
+gray_img_arr_clean = gray_img_arr.copy()
+
+go_on = True
+
+while go_on:
 
 
-X_vect = np.array([])
-Y_vect = np.array([])
 
-for x,y in d:
-    if d[y, x] == 0:
-        np.append(X_vect, x)
-        np.append(Y_vect, y)
 
-print(d.shape[1])
+# np.append(X_vect, x)
+
+
 
 pyplot.show()
