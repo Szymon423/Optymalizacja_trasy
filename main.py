@@ -5,7 +5,7 @@ import calculations as calc
 from PIL import Image, ImageOps
 
 length = 2000
-offset = 50
+offset = 10
 X, Y = calc.generate_route(length)
 
 
@@ -16,47 +16,25 @@ alfa = np.arctan2(dy, dx)
 dalfa = np.array([(alfa[i] - alfa[i-1]) for i in range(1, length - 1)])
 
 K = dalfa/T[0:-1]
+# import zdjęcia
+img = Image.open("test_3.bmp")
+gray_img = ImageOps.grayscale(img)
+gray_img_arr = np.asarray(gray_img)
 
+# przekształcenie zdjęcia do wektora trasy
+X_vect, Y_vect = calc.img_to_path(gray_img_arr)
 
-Xl, Yl = calc.left_edge(offset, X, Y)
-Xr, Yr = calc.right_edge(offset, X, Y)
+# obliczenia lewych i prawych ograniczeń
+Xl, Yl = calc.left_edge(offset, X_vect, Y_vect)
+Xr, Yr = calc.right_edge(offset, X_vect, Y_vect)
 
 
 pyplot.figure(1)
-pyplot.plot(X, Y)
+pyplot.plot(X_vect, Y_vect)
 pyplot.plot(Xl, Yl)
 pyplot.plot(Xr, Yr)
-pyplot.xlim([0, length])
-pyplot.ylim([-500, 500])
-
-img = Image.open("test_1.jpg")
-
-gray_img = ImageOps.grayscale(img)
-
-print(gray_img.size)
-
-X_vect = np.array([0])
-Y_vect = np.array([], dtype=int)
-
-gray_img_arr = np.asarray(gray_img)
-coll_0 = gray_img_arr[:, 0]
-a = np.where(coll_0 == 0)
-print(a[0][0])
-Y_vect = np.append(Y_vect,a[0][0])
-print(X_vect)
-print(Y_vect)
-
-gray_img_arr_clean = gray_img_arr.copy()
-
-go_on = True
-
-while go_on:
-
-
-
-
-# np.append(X_vect, x)
-
-
-
+pyplot.xlim([0, 500])
+pyplot.ylim([0, 300])
 pyplot.show()
+
+
