@@ -17,24 +17,33 @@ dalfa = np.array([(alfa[i] - alfa[i-1]) for i in range(1, length - 1)])
 
 K = dalfa/T[0:-1]
 # import zdjęcia
-img = Image.open("test_3.bmp")
+img = Image.open("test_4.bmp")
 gray_img = ImageOps.grayscale(img)
 gray_img_arr = np.asarray(gray_img)
 
 # przekształcenie zdjęcia do wektora trasy
 X_vect, Y_vect = calc.img_to_path(gray_img_arr)
 
-# obliczenia lewych i prawych ograniczeń
-Xl, Yl = calc.left_edge(offset, X_vect, Y_vect)
-Xr, Yr = calc.right_edge(offset, X_vect, Y_vect)
+# wygładzenie wektora z trasą
+X_vect_smoth, Y_vect_smoth = calc.smooth_path(X_vect, Y_vect, 10)
 
+# obliczenia lewych i prawych ograniczeń
+Xl, Yl = calc.left_edge(offset, X_vect_smoth, Y_vect_smoth)
+Xr, Yr = calc.right_edge(offset, X_vect_smoth, Y_vect_smoth)
+
+# wygładzenie ograniczeń prawo i lewo stronnych
+smoothness = 20
+Xr_smoth, Yr_smoth = calc.smooth_path(Xr, Yr, smoothness)
+Xl_smoth, Yl_smoth = calc.smooth_path(Xl, Yl, smoothness)
+
+print("bez smothingu:", len(Xl), "smothed:", len(Xl_smoth))
 
 pyplot.figure(1)
 pyplot.plot(X_vect, Y_vect)
-pyplot.plot(Xl, Yl)
-pyplot.plot(Xr, Yr)
+pyplot.plot(Xl_smoth, Yl_smoth)
+pyplot.plot(Xr_smoth, Yr_smoth)
 pyplot.xlim([0, 500])
-pyplot.ylim([0, 300])
+pyplot.ylim([300, 0])
 pyplot.show()
 
 

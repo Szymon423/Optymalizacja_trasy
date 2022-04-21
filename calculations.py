@@ -54,9 +54,10 @@ def img_to_path(img):
     prew_help_coll = 0
 
     while go_on:
+        print("row:", row, "coll:", coll)
+        print("p_row:", prew_help_row, "p_coll:", prew_help_coll)
         if first_go:
             help_ = gray_img_arr[row-1:row+2, coll:coll+2]
-            print(help_)
             if help_[0, 1] == 0:
                 if help_[1, 1] == 0:
                     gray_img_arr_clean[row-1, coll+1] = 255
@@ -85,7 +86,6 @@ def img_to_path(img):
 
         elif last_go:
             help_ = gray_img_arr[row-1:row+2, coll-1:]
-            print(help_)
             if help_[0, 1] == 0:
                 if help_[1, 1] == 0:
                     gray_img_arr_clean[row-1, coll+1] = 255
@@ -115,8 +115,6 @@ def img_to_path(img):
 
         else:
             help_ = gray_img_arr[row-1:row+2, coll-1:coll+2]
-            print("row:", row, "coll:", coll)
-            print("p_row:", prew_help_row, "p_coll:", prew_help_coll)
             # ostatnie help_ [0, 0]
             if prew_help_row == 0 and prew_help_coll == 0:
                 # w kierunku prawa góra
@@ -410,10 +408,8 @@ def img_to_path(img):
 
             # ostatnie help_ [2, 0]
             if prew_help_row == 2 and prew_help_coll == 0:
-                print("i am here0")
                 # w kierunku lewa góra
                 if help_[0, 0] == 0:
-                    print("i am here1")
                     if help_[0, 1] == 0:
                         gray_img_arr_clean[row-1, coll] = 255
                     Y_vect = np.append(Y_vect, row-1)
@@ -424,7 +420,6 @@ def img_to_path(img):
                     prew_help_coll = 2
                 # w kierunku prawa góra
                 elif help_[0, 2] == 0:
-                    print("i am here2")
                     if help_[0, 1] == 0:
                         gray_img_arr_clean[row-1, coll] = 255
                     if help_[1, 2] == 0:
@@ -437,7 +432,6 @@ def img_to_path(img):
                     prew_help_coll = 0
                 # w kierunku prawy dół
                 elif help_[2, 2] == 0:
-                    print("i am here3")
                     if help_[1, 2] == 0:
                         gray_img_arr_clean[row, coll+1] = 255
                     Y_vect = np.append(Y_vect, row+1)
@@ -448,7 +442,6 @@ def img_to_path(img):
                     prew_help_coll = 0
                 # w kierunku prawa
                 elif help_[1, 2] == 0:
-                    print("i am here4")
                     Y_vect = np.append(Y_vect, row)
                     X_vect = np.append(X_vect, coll+1)
                     coll += 1
@@ -456,7 +449,6 @@ def img_to_path(img):
                     prew_help_coll = 0
                 # w kiedunku góra
                 else:
-                    print("i am here5")
                     Y_vect = np.append(Y_vect, row-1)
                     X_vect = np.append(X_vect, coll)
                     row -= 1
@@ -511,7 +503,37 @@ def img_to_path(img):
                     prew_help_row = 0
                     prew_help_coll = 1
 
-        if coll == 499:
+        if coll >= 498:
             last_go = True
 
+        # if row == 37:
+        #     go_on = False
     return X_vect, Y_vect
+
+
+def smooth_path(x, y, smothness):
+    X = np.zeros(len(x) + smothness)
+    Y = np.zeros(len(y) + smothness)
+    print("i am here 0")
+    for i in range(len(x)+smothness):
+        if i < smothness:
+            sum_ = np.average(x[:i+1])
+        elif i >= len(x):
+            sum_ = np.average(x[i-smothness:])
+        else:
+            sum_ = np.average(x[i-smothness:i])
+        X[i] = sum_
+    for i in range(len(y)+smothness):
+        if i < smothness:
+            sum_ = np.average(y[:i+1])
+        elif i >= len(y):
+            sum_ = np.average(y[i-smothness:])
+        else:
+            sum_ = np.average(y[i-smothness:i])
+        Y[i] = sum_
+
+    return X, Y
+
+
+
+
