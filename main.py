@@ -53,13 +53,18 @@ def main():
     # pyplot.legend(["droga po 1 przejeździe", "lewa granica", "prawa granica"])
     # pyplot.show()
 
-    H = calc.H_matrix(Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth)
+
     # print("X_vect_smoth:", len(X_vect_smoth), "Y_vect_smoth:", len(Y_vect_smoth))
     # print("Xl_smoth:", len(Xl_smoth), "Yl_smoth:", len(Yl_smoth))
     # print("Xr_smoth:", len(Xr_smoth), "Yr_smoth:", len(Yr_smoth))
+
+    H = calc.H_matrix(Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth)
     print(H[:3, :3])
 
+    B = calc.B_matrix(Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth)
+    print(B.shape)
 
+    alfa = np.full_like(B, 0.5)
 
 
 

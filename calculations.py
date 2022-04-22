@@ -576,11 +576,13 @@ def H_matrix(xl, yl, xr, yr):
 def B_matrix(xl, yl, xr, yr):
     n = len(xl)
     B = np.zeros(n)
-    for i in range(1, n - 1):
+    for i in range(1, n-2):
         if i == 1:
-            B[i] = (xr[i] - xr[i+1]) * calc_delta(xl, xr, i) + (xr[i] - xr[i+1]) * calc_delta(xl, xr, i)
-
-
+            B[i] = (xr[i] - xr[i+1]) * calc_delta(xl, xr, i) + (yr[i] - yr[i+1]) * calc_delta(yl, yr, i)
+        else:
+            B[i] = (2 * xr[i] - xr[i-1] - xr[i+1]) * calc_delta(xl, xr, i) + (2 * yr[i] - yr[i-1] - yr[i+1]) * calc_delta(yl, yr, i)
+    n -= 1
+    B[n] = (xr[n] - xr[n-1]) * calc_delta(xl, xr, n) + (yr[n] - yr[n-1]) * calc_delta(yl, yr, n)
     return B
 
 
