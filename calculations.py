@@ -535,5 +535,13 @@ def smooth_path(x, y, smothness):
     return X, Y
 
 
+def add_noise(x, y, noise_lvl):
+    alfa = calculate_alfa(x, y)
+    # x_noise = x[:-2] + noise_lvl * np.cos(alfa + np.pi / 2) * (np.random.rand(len(x[:-2])) * 2 - 1)
+    # y_noise = y[:-2] + noise_lvl * np.sin(alfa + np.pi / 2) * (np.random.rand(len(y[:-2])) * 2 - 1)
+    x_noise = x[:-2] + noise_lvl * np.cos(alfa + np.pi / 2) * (np.sin(np.arange(len(x[:-2]))*2*np.pi/20) + np.random.rand(len(x[:-2])) * 0.1)
+    y_noise = y[:-2] + noise_lvl * np.sin(alfa + np.pi / 2) * (np.sin(np.arange(len(y[:-2]))*2*np.pi/20) + np.random.rand(len(x[:-2])) * 0.1)
+    return x_noise, y_noise
+
 
 
