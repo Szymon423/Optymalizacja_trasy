@@ -501,7 +501,7 @@ def img_to_path(img):
                     prew_help_row = 0
                     prew_help_coll = 1
 
-        if coll >= 498:
+        if coll >= max_coll-2:
             last_go = True
 
         # if row == 37:
@@ -556,3 +556,33 @@ def calculate_curvature(X, Y):
     for i in range(len(K)):
         K[i] = 0 if T[i] == 0 else dalfa[i] / T[i]
     return K
+
+
+# obliczenie macierzy H do optymalizacji z najkrótkszą ścieżką
+def H_matrix(xl, yl, xr, yr):
+    n = len(xl)
+    H = np.zeros([n, n])
+    for i in range(1, n-1):
+        H[i-1, i] = - calc_delta(xl, xr, i-1) * calc_delta(xl, xr, i) - calc_delta(yl, yr, i-1) * calc_delta(yl, yr, i)
+        H[i, i+1] = - calc_delta(xl, xr, i) * calc_delta(xl, xr, i+1) - calc_delta(yl, yr, i) * calc_delta(yl, yr, i+1)
+        if i == 1 or i == n:
+            H[i, i] = calc_delta(xl, xr, i) ** 2 + calc_delta(yl, yr, i) ** 2
+        if i != 1 or i != n:
+            H[i, i] = 2 * (calc_delta(xl, xr, i) ** 2 + calc_delta(yl, yr, i) ** 2)
+    return H
+
+
+
+def B_matrix(xl, yl, xr, yr):
+    n = len(xl)
+    B = np.zeros(n)
+    for i in range(1, n - 1):
+        if i == 1:
+            B[i] = (xr[i] - xr[i+1]) * calc_delta(xl, xr, i) + (xr[i] - xr[i+1]) * calc_delta(xl, xr, i)
+
+
+    return B
+
+
+def calc_delta(l, r, i):
+    return l[i] - r[i]
