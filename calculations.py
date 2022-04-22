@@ -544,4 +544,12 @@ def add_noise(x, y, noise_lvl):
     return x_noise, y_noise
 
 
+def calculate_curvature(X, Y):
+    dx = np.array([(X[i] - X[i - 1]) for i in range(1, len(X))])
+    dy = np.array([(Y[i] - Y[i - 1]) for i in range(1, len(X))])
+    T = (dx ** 2 + dy ** 2) ** 0.5
+    alfa = np.arctan2(dy, dx)
+    dalfa = np.array([(alfa[i] - alfa[i - 1]) for i in range(1, len(X) - 1)])
+    K = dalfa / T[:-1]
+    return K
 
