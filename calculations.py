@@ -2,12 +2,7 @@ from matplotlib import pyplot
 import numpy as np
 
 
-def generate_route(end):
-    X = np.linspace(0, end + 1, end)
-    Y = np.sin(X*2*np.pi/2000)*200# + np.sin(X*2*np.pi/200)*2 + (np.random.rand(2000)*10 - 1) * 2
-    return X, Y
-
-
+# obliczenia dla krawędzi lewostronnej zgodne z wzorami z pracy mgr
 def left_edge(length, X, Y):
     alfa = calculate_alfa(X, Y)
     X_l = X[:-2] + length*np.cos(alfa + np.pi/2)
@@ -15,6 +10,7 @@ def left_edge(length, X, Y):
     return X_l, Y_l
 
 
+# obliczenia dla krawędzi prawostronnej zgodne z wzorami z pracy mgr
 def right_edge(length, X, Y):
     alfa = calculate_alfa(X, Y)
     X_r = X[:-2] + length*np.cos(alfa - np.pi/2)
@@ -22,6 +18,7 @@ def right_edge(length, X, Y):
     return X_r, Y_r
 
 
+# obliczenia alfy zgodnie z wzorami z pracy mgr
 def calculate_alfa(x, y):
     dx = np.array([(x[i+1] - x[i-1]) for i in range(1, len(x)-1)])
     dy = np.array([(y[i+1] - y[i-1]) for i in range(1, len(y)-1)])
@@ -29,6 +26,7 @@ def calculate_alfa(x, y):
     return alfa
 
 
+# tutaj jest algorytm zamiany zdjęcia na wektory trasy, ale nie będę go opisywał bo jest dość zawiły
 def img_to_path(img):
     X_vect = np.array([0], dtype=int)
     Y_vect = np.array([], dtype=int)
@@ -511,6 +509,7 @@ def img_to_path(img):
     return X_vect, Y_vect
 
 
+# wygładzanie jest realizaowane przez uśrednianie N poprzednich próbek
 def smooth_path(x, y, smothness):
     X = np.zeros(len(x) + smothness)
     Y = np.zeros(len(y) + smothness)
@@ -535,21 +534,25 @@ def smooth_path(x, y, smothness):
     return X, Y
 
 
+# dodanie szumów jest realizowane za pomocą dodania wartości sinusa oraz małej randomowej wartości w osi prostopadłej do przebiegu
 def add_noise(x, y, noise_lvl):
     alfa = calculate_alfa(x, y)
     # x_noise = x[:-2] + noise_lvl * np.cos(alfa + np.pi / 2) * (np.random.rand(len(x[:-2])) * 2 - 1)
     # y_noise = y[:-2] + noise_lvl * np.sin(alfa + np.pi / 2) * (np.random.rand(len(y[:-2])) * 2 - 1)
-    x_noise = x[:-2] + noise_lvl * np.cos(alfa + np.pi / 2) * (np.sin(np.arange(len(x[:-2]))*2*np.pi/20) + np.random.rand(len(x[:-2])) * 0.1)
-    y_noise = y[:-2] + noise_lvl * np.sin(alfa + np.pi / 2) * (np.sin(np.arange(len(y[:-2]))*2*np.pi/20) + np.random.rand(len(x[:-2])) * 0.1)
+    x_noise = x[:-2] + noise_lvl * np.cos(alfa + np.pi / 2) * (np.sin(np.arange(len(x[:-2]))*2*np.pi/20) + (np.random.rand(len(x[:-2])) * 2 - 1) * 0.1)
+    y_noise = y[:-2] + noise_lvl * np.sin(alfa + np.pi / 2) * (np.sin(np.arange(len(y[:-2]))*2*np.pi/20) + (np.random.rand(len(y[:-2])) * 2 - 1) * 0.1)
     return x_noise, y_noise
 
 
+# obliczenia krzywizny zgodnie z pracą mgr
 def calculate_curvature(X, Y):
     dx = np.array([(X[i] - X[i - 1]) for i in range(1, len(X))])
     dy = np.array([(Y[i] - Y[i - 1]) for i in range(1, len(X))])
     T = (dx ** 2 + dy ** 2) ** 0.5
     alfa = np.arctan2(dy, dx)
     dalfa = np.array([(alfa[i] - alfa[i - 1]) for i in range(1, len(X) - 1)])
-    K = dalfa / T[:-1]
+    # żeby nie dzielić przez 0
+    K = np.zeros_like(dalfa)
+    for i in range(len(K)):
+        K[i] = 0 if T[i] == 0 else dalfa[i] / T[i]
     return K
-
