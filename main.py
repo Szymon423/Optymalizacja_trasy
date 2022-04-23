@@ -1,5 +1,4 @@
 from matplotlib import pyplot
-import matplotlib.image as image
 import numpy as np
 import calculations as calc
 from PIL import Image, ImageOps
@@ -67,25 +66,35 @@ def main():
     # wyznaczenie optymalnej wartości alfa
     population_size = 100
     epochs = 500
-    min_err = 0.00005
+    min_err = 0.000005
     catcher = np.asarray(genetic_optimization(alfa, H, B, population_size, epochs, min_err), dtype=object)
     optim_alfa = np.asarray(catcher[1])
-    print(optim_alfa.shape)
+
+    X_not_opt, Y_not_opt = calc.x_and_y_from_alfa(alfa, Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth)
 
     # obliczenie optymalej trasy na podstawie optymalnego alfa
-    X_opt = Xr_smoth + optim_alfa[1] * (Xl_smoth - Xr_smoth)
-    Y_opt = Yr_smoth + optim_alfa[1] * (Yl_smoth - Yr_smoth)
-    print(optim_alfa[:50])
+    X_opt, Y_opt = calc.x_and_y_from_alfa(optim_alfa[1], Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth)
+
+
+    print("Pierwsze 50 elementów macierzy alfa:", optim_alfa[:50])
+
     # wyświetlenie trasy pokonanej przez robota oraz obliczonych ograniczń obustronnych
     pyplot.figure(3)
     pyplot.plot(X_opt, Y_opt)
+    pyplot.plot(X_not_opt, Y_not_opt)
     pyplot.plot(Xl_smoth, Yl_smoth)
     pyplot.plot(Xr_smoth, Yr_smoth)
     pyplot.xlim([0, 500])
     pyplot.ylim([300, 0])
-    pyplot.legend(["najkrótsza trasa", "lewa granica", "prawa granica"])
+    pyplot.legend(["najkrótsza trasa", "bez optymalizacji","lewa granica", "prawa granica"])
     pyplot.show()
 
 
+    # obliczenie długości lewego i prawego ograniczenia
+    n = Xr_smoth
+    S2_l = 0
+    for i in range(1, len(n)):
+        S2_l += (Xl_smoth[i] - Xl_smoth[i-1]) ** 2 + (Yl_smoth[i] - Yl_smoth[i-1]) ** 2
+    print(S2_l)
 if __name__ == "__main__":
     main()

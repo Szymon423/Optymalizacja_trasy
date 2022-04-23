@@ -49,7 +49,9 @@ def genetic_optimization(alfa, h, b, solutions_number, epochs, min_err):
             to_append2 = []
             for xx in range(n):
                 num = random.choice(elements)
-                this = (num * random.uniform(0.99, 1.01) * (num > 0) * (num < 1) + 1 * (num > 1) + 0 * (num < 0)) if xx > 0 else 0.5
+                this = (num * random.uniform(0.99, 1.01) * (num > 0) * (num < 1) +
+                        1 * (num > 1) +
+                        0 * (num < 0)) if xx > 0 else 0.5
                 to_append2.append(this)
             new_gen.append(tuple(to_append2))
         solutions = new_gen
