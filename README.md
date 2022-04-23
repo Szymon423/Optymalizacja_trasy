@@ -20,3 +20,5 @@ Na ten moment w programie zaimplementowane jest:
 - dodałem też filtrowanie trasy
 
   Filtrowanie, a właściwie uśrednianie pozwala na pozbycie się poszarpanych krawędzie przy tworzeniu ograniczeń trasy
+
+# Do poprawy jest działanie algorytmu genetycznego
