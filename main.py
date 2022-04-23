@@ -44,28 +44,26 @@ def main():
     # pyplot.legend(["Krzywizna przed wygładzeniem", "Krzywizna po wygładzeniu"])
 
     # wyświetlenie trasy pokonanej przez robota oraz obliczonych ograniczń obustronnych
-    # pyplot.figure(2)
-    # pyplot.plot(X_after_1st_ride, Y_after_1st_ride)
-    # pyplot.plot(Xl_smoth, Yl_smoth)
-    # pyplot.plot(Xr_smoth, Yr_smoth)
-    # pyplot.xlim([0, 500])
-    # pyplot.ylim([300, 0])
-    # pyplot.legend(["droga po 1 przejeździe", "lewa granica", "prawa granica"])
-    # pyplot.show()
+    pyplot.figure(2)
+    pyplot.plot(X_after_1st_ride, Y_after_1st_ride)
+    pyplot.plot(Xl_smoth, Yl_smoth)
+    pyplot.plot(Xr_smoth, Yr_smoth)
+    pyplot.xlim([0, 500])
+    pyplot.ylim([300, 0])
+    pyplot.legend(["droga po 1 przejeździe", "lewa granica", "prawa granica"])
+    pyplot.show()
 
 
     # print("X_vect_smoth:", len(X_vect_smoth), "Y_vect_smoth:", len(Y_vect_smoth))
     # print("Xl_smoth:", len(Xl_smoth), "Yl_smoth:", len(Yl_smoth))
     # print("Xr_smoth:", len(Xr_smoth), "Yr_smoth:", len(Yr_smoth))
 
+    # obliczenie wskaźnika do minimalizacji
     H = calc.H_matrix(Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth)
-    print(H[:3, :3])
-
     B = calc.B_matrix(Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth)
-    print(B.shape)
-
     alfa = np.full_like(B, 0.5)
-
+    J = np.matmul(np.matmul(np.transpose(alfa), H), alfa) + np.matmul(B, alfa)
+    print(J)
 
 
 if __name__ == "__main__":
