@@ -3,6 +3,7 @@ import matplotlib.image as image
 import numpy as np
 import calculations as calc
 from PIL import Image, ImageOps
+from genetic_algoritm import genetic_optimization
 
 
 def main():
@@ -44,14 +45,14 @@ def main():
     # pyplot.legend(["Krzywizna przed wygładzeniem", "Krzywizna po wygładzeniu"])
 
     # wyświetlenie trasy pokonanej przez robota oraz obliczonych ograniczń obustronnych
-    pyplot.figure(2)
-    pyplot.plot(X_after_1st_ride, Y_after_1st_ride)
-    pyplot.plot(Xl_smoth, Yl_smoth)
-    pyplot.plot(Xr_smoth, Yr_smoth)
-    pyplot.xlim([0, 500])
-    pyplot.ylim([300, 0])
-    pyplot.legend(["droga po 1 przejeździe", "lewa granica", "prawa granica"])
-    pyplot.show()
+    # pyplot.figure(2)
+    # pyplot.plot(X_after_1st_ride, Y_after_1st_ride)
+    # pyplot.plot(Xl_smoth, Yl_smoth)
+    # pyplot.plot(Xr_smoth, Yr_smoth)
+    # pyplot.xlim([0, 500])
+    # pyplot.ylim([300, 0])
+    # pyplot.legend(["droga po 1 przejeździe", "lewa granica", "prawa granica"])
+    # pyplot.show()
 
 
     # print("X_vect_smoth:", len(X_vect_smoth), "Y_vect_smoth:", len(Y_vect_smoth))
@@ -62,8 +63,28 @@ def main():
     H = calc.H_matrix(Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth)
     B = calc.B_matrix(Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth)
     alfa = np.full_like(B, 0.5)
-    J = np.matmul(np.matmul(np.transpose(alfa), H), alfa) + np.matmul(B, alfa)
-    print(J)
+
+    # wyznaczenie optymalnej wartości alfa
+    population_size = 100
+    epochs = 500
+    min_err = 0.00005
+    catcher = np.asarray(genetic_optimization(alfa, H, B, population_size, epochs, min_err), dtype=object)
+    optim_alfa = np.asarray(catcher[1])
+    print(optim_alfa.shape)
+
+    # obliczenie optymalej trasy na podstawie optymalnego alfa
+    X_opt = Xr_smoth + optim_alfa[1] * (Xl_smoth - Xr_smoth)
+    Y_opt = Yr_smoth + optim_alfa[1] * (Yl_smoth - Yr_smoth)
+    print(optim_alfa[:50])
+    # wyświetlenie trasy pokonanej przez robota oraz obliczonych ograniczń obustronnych
+    pyplot.figure(3)
+    pyplot.plot(X_opt, Y_opt)
+    pyplot.plot(Xl_smoth, Yl_smoth)
+    pyplot.plot(Xr_smoth, Yr_smoth)
+    pyplot.xlim([0, 500])
+    pyplot.ylim([300, 0])
+    pyplot.legend(["najkrótsza trasa", "lewa granica", "prawa granica"])
+    pyplot.show()
 
 
 if __name__ == "__main__":
