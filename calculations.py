@@ -32,10 +32,7 @@ def img_to_path(img):
     gray_img_arr = img
     coll_0 = gray_img_arr[:, 0]
     a = np.where(coll_0 == 0)
-    print(a[0][0])
     Y_vect = np.append(Y_vect,a[0][0])
-    print("X:", X_vect)
-    print("Y:", Y_vect)
 
     gray_img_arr_clean = gray_img_arr
 
@@ -51,8 +48,8 @@ def img_to_path(img):
     prew_help_coll = 0
 
     while go_on:
-        print("row:", row, "coll:", coll)
-        print("p_row:", prew_help_row, "p_coll:", prew_help_coll)
+        # print("row:", row, "coll:", coll)
+        # print("p_row:", prew_help_row, "p_coll:", prew_help_coll)
         if first_go:
             help_ = gray_img_arr[row-1:row+2, coll:coll+2]
             if help_[0, 1] == 0:
@@ -512,7 +509,6 @@ def img_to_path(img):
 def smooth_path(x, y, smothness):
     X = np.zeros(len(x) + smothness)
     Y = np.zeros(len(y) + smothness)
-    print("i am here 0")
     for i in range(len(x)+smothness):
         if i < smothness:
             sum_ = np.average(x[:i+1])
@@ -590,5 +586,5 @@ def calc_delta(l, r, i):
 
 def x_and_y_from_alfa(alfa, xl, yl, xr, yr):
     x = xr + alfa * (xl - xr)
-    y = yl + alfa * (yl - yr)
+    y = yr + alfa * (yl - yr)
     return x, y
