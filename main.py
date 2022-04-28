@@ -64,42 +64,61 @@ def main():
     alfa = np.full(len(B), 0.5)
 
     # wyznaczenie optymalnej wartości alfa
-    population_size = 1000
-    epochs = 100
-    min_err = 5
-    catcher = np.asarray(genetic_optimization(alfa, H, B, population_size, epochs, min_err), dtype=object)
+    population_size = 100
+    epochs = 2
+    min_err = 50
+    catcher = np.asarray(genetic_optimization(alfa,
+                                              Xl_smoth, Yl_smoth,
+                                              Xr_smoth, Yr_smoth,
+                                              population_size, epochs, min_err), dtype=object)
     optim_alfa = np.asarray(catcher[1])
 
+    # obliczenie NIEoptymalej trasy na podstawie ustalonego alfa
     X_not_opt, Y_not_opt = calc.x_and_y_from_alfa(alfa, Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth)
+
+    # obliczenia dla znaleznienia alfa określającego krótsze krawędzie
+    filtration = 5
+    strength = 0.65
+    alfa_whats_longer = calc.find_shortest_edges(Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth, strength, filtration)
+    X_maybe, Y_maybe = calc.x_and_y_from_alfa(alfa_whats_longer, Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth)
+
 
     # obliczenie optymalej trasy na podstawie optymalnego alfa
     X_opt, Y_opt = calc.x_and_y_from_alfa(optim_alfa, Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth)
 
+    # wyświetlenie trasy pokonanej przez robota oraz obliczonych ograniczń obustronnych
+    pyplot.figure(4)
+    pyplot.plot(X_maybe, Y_maybe)
+    pyplot.plot(X_not_opt, Y_not_opt)
+    # pyplot.plot(Xl_smoth, Yl_smoth)
+    # pyplot.plot(Xr_smoth, Yr_smoth)
+    pyplot.xlim([0, gray_img_arr.shape[1]])
+    pyplot.ylim([gray_img_arr.shape[0], 0])
+    # pyplot.legend(["najkrótsza trasa", "bez optymalizacji","lewa granica", "prawa granica"])
 
     # print("Pierwsze 50 elementów macierzy alfa:", optim_alfa[:50])
 
-    # wyświetlenie trasy pokonanej przez robota oraz obliczonych ograniczń obustronnych
-    pyplot.figure(3)
-    pyplot.plot(X_opt, Y_opt)
-    pyplot.plot(X_not_opt, Y_not_opt)
-    pyplot.plot(Xl_smoth, Yl_smoth)
-    pyplot.plot(Xr_smoth, Yr_smoth)
-    pyplot.xlim([0, gray_img_arr.shape[1]])
-    pyplot.ylim([gray_img_arr.shape[0], 0])
-    pyplot.legend(["najkrótsza trasa", "bez optymalizacji","lewa granica", "prawa granica"])
+    # # wyświetlenie trasy pokonanej przez robota oraz obliczonych ograniczń obustronnych
+    # pyplot.figure(4)
+    # pyplot.plot(X_opt, Y_opt)
+    # pyplot.plot(X_not_opt, Y_not_opt)
+    # pyplot.plot(Xl_smoth, Yl_smoth)
+    # pyplot.plot(Xr_smoth, Yr_smoth)
+    # pyplot.xlim([0, gray_img_arr.shape[1]])
+    # pyplot.ylim([gray_img_arr.shape[0], 0])
+    # pyplot.legend(["najkrótsza trasa", "bez optymalizacji","lewa granica", "prawa granica"])
 
-    # obliczenie długości lewego i prawego ograniczenia
+    # obliczenie długości lewego i prawego ograniczenia oraz optymalnej trasy
     n = Xr_smoth
     S2_l = 0
     S2_r = 0
+    S2_opt = 0
     for i in range(1, len(n)):
         S2_l += (Xl_smoth[i] - Xl_smoth[i-1]) ** 2 + (Yl_smoth[i] - Yl_smoth[i-1]) ** 2
         S2_r += (Xr_smoth[i] - Xr_smoth[i-1]) ** 2 + (Yr_smoth[i] - Yr_smoth[i-1]) ** 2
-    print("s2_l:", S2_l, "s2_r:", S2_r)
+        S2_opt += (X_opt[i] - X_opt[i-1]) ** 2 + (Y_opt[i] - Y_opt[i-1]) ** 2
+    print("s2_l:", S2_l, "s2_r:", S2_r,  "s2_opt:", S2_opt)
 
-    # dupa = Xl_smoth - Xr_smoth
-    # pyplot.figure(4)
-    # pyplot.plot(dupa)
     pyplot.show()
 
 

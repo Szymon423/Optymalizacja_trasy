@@ -588,3 +588,59 @@ def x_and_y_from_alfa(alfa, xl, yl, xr, yr):
     x = xr + alfa * (xl - xr)
     y = yr + alfa * (yl - yr)
     return x, y
+
+
+def length_of_route(x, y):
+    len_ = 0
+    for i in range(1, len(x)):
+        len_ += (x[i] - x[i-1]) ** 2 + (y[i] - y[i-1]) ** 2
+    return len_
+
+
+def length_of(xl, yl, xr, yr):
+    n = len(xl)
+    len_l = 0
+    len_r = 0
+
+    for i in range(1, n):
+        len_l += (xl[i] - xl[i-1]) ** 2 + (yl[i] - yl[i-1]) ** 2
+        len_r += (xr[i] - xr[i-1]) ** 2 + (yr[i] - yr[i-1]) ** 2
+    return len_l, len_r
+
+
+def find_shortest_edges(xl, yl, xr, yr, strength, filtration):
+    # obliczanie długości fragmentów trasy
+    len_l = np.zeros_like(xl)
+    len_r = np.zeros_like(xl)
+    count = 10
+    alfa_whats_longer = np.full_like(xl, 0.5)
+    alfa_whats_longer_new = np.full_like(xl, 0.5)
+
+    for j in range(len(len_l)-count):
+        Xl_smoth_short = xl[j:j+count]
+        Yl_smoth_short = yl[j:j+count]
+        Xr_smoth_short = xr[j:j+count]
+        Yr_smoth_short = yr[j:j+count]
+        len_l[j], len_r[j] = length_of(Xl_smoth_short, Yl_smoth_short, Xr_smoth_short, Yr_smoth_short)
+        if strength*len_l[j] > len_r[j]:
+            alfa_whats_longer[j] = 0
+        elif strength*len_r[j] > len_l[j]:
+            alfa_whats_longer[j] = 1
+        else:
+            alfa_whats_longer[j] = 0.5
+
+    zero_counter = 0
+    one_counter = 0
+    how_many = filtration
+
+    # proste filtrowanie
+    for i in range(how_many, len(alfa_whats_longer)):
+        suma = sum(alfa_whats_longer[i-how_many:i])
+        if suma > how_many*0.8:
+            alfa_whats_longer_new[i] = 1
+        elif suma > how_many*0.4:
+            alfa_whats_longer_new[i] = 0.5
+        else:
+            alfa_whats_longer_new[i] = 0
+
+    return alfa_whats_longer_new
