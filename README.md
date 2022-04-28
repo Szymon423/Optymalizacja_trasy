@@ -24,4 +24,4 @@ Na ten moment w programie zaimplementowane jest:
 # Do poprawy jest działanie algorytmu genetycznego
 Mam pomysł taki, żeby zamiast randomowo generować pierwszą populację to wygenerować populacje, w których wektor alfa składa się z samych 0 i 1. W zależności od tego, który łuk ograniczeń trasy (górny/dolny, lewy/prawy) jest krótszy, wówczas trasa powinna do niego przylegać. i zobaczyć jak zachowa się algorytm genetyczny dla takiej populacji początkowej.
 
-Ewentualnie można próbować implementować wykrywanie łuków i na tej podstawie przyklejać się do odpowiedniej strony ograniczającej trasę, a pomiędzy punktami stanowiącymi końce łuków wykonywać interpolację liniową.
+Właściwie to, zrobiłem wykrywanie krótszych fragmentów, trzeba tam tylko poprawić filtrowanie, żeby poznbyć się jakichś dziwnych zachowań. Ogólnie to dobry początek pod generowanie populacji startowych o zadanych własnościach.
