@@ -39,18 +39,19 @@ def genetic_optimization(alfa, xl, yl, xr, yr, solutions_number, epochs, min_err
 
         if ranked_solutions[0][0] > min_err:
             break
-
+        # wybór 10 procent najlepszych rozwiązń
         best_solutions = ranked_solutions[:solutions_number//10]
 
         elements = np.array([])
         for s in best_solutions:
             elements = np.append(elements, s[1])
-
+        print(elements.shape)
         new_gen = []
-        for _ in range(solutions_number):
+        for j in range(solutions_number):
             to_append2 = []
             for xx in range(n):
                 num = random.choice(elements)
+                # print("num", num)
                 this = (num * random.uniform(0.95, 1.05) * (num > 0) * (num < 1) +
                         1 * (num > 1) +
                         0 * (num < 0)) if xx > 0 else 0.5
@@ -58,4 +59,3 @@ def genetic_optimization(alfa, xl, yl, xr, yr, solutions_number, epochs, min_err
             new_gen.append(tuple(to_append2))
         solutions = new_gen
     return ranked_solutions[0]
-

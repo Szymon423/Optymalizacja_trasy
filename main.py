@@ -3,6 +3,8 @@ import numpy as np
 import calculations as calc
 from PIL import Image, ImageOps
 from genetic_algoritm import genetic_optimization
+import my_genetic_algorithm as mGA
+
 
 
 def main():
@@ -64,14 +66,17 @@ def main():
     alfa = np.full(len(B), 0.5)
 
     # wyznaczenie optymalnej wartości alfa
-    population_size = 100
-    epochs = 2
-    min_err = 50
-    catcher = np.asarray(genetic_optimization(alfa,
-                                              Xl_smoth, Yl_smoth,
-                                              Xr_smoth, Yr_smoth,
-                                              population_size, epochs, min_err), dtype=object)
-    optim_alfa = np.asarray(catcher[1])
+    # population_size = 100
+    # epochs = 2000
+    # min_fit = 50
+    # catcher = np.asarray(genetic_optimization(alfa,
+    #                                           Xl_smoth, Yl_smoth,
+    #                                           Xr_smoth, Yr_smoth,
+    #                                           population_size, epochs, min_err), dtype=object)
+    # optim_alfa = np.asarray(catcher[1])
+
+
+
 
     # obliczenie NIEoptymalej trasy na podstawie ustalonego alfa
     X_not_opt, Y_not_opt = calc.x_and_y_from_alfa(alfa, Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth)
@@ -79,19 +84,47 @@ def main():
     # obliczenia dla znaleznienia alfa określającego krótsze krawędzie
     filtration = 5
     strength = 0.65
-    alfa_whats_longer = calc.find_shortest_edges(Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth, strength, filtration)
-    X_maybe, Y_maybe = calc.x_and_y_from_alfa(alfa_whats_longer, Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth)
+    alfa_whats_shorter = calc.find_shortest_edges(Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth, strength, filtration)
+    X_maybe, Y_maybe = calc.x_and_y_from_alfa(alfa_whats_shorter, Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth)
 
+    prev_1 = 0.5
+    prev_2 = 0.5
+    curr = 0.5
+    start = False
+
+    for i in range(len(alfa_whats_shorter)):
+        if alfa_whats_shorter[i] == 1 or alfa_whats_shorter[i] == 0:
+            prev_2 = alfa_whats_shorter[i]
+            prev_1 = alfa_whats_shorter[i]
+            start = True
+        if start:
+            curr = alfa_whats_shorter[i]
+            if curr == prev_2:
+                print("here")
+
+
+        alfa_even_shorter =
+
+    population_size = 100
+    epochs = 5000
+    min_fit = 5000
+    optim_alfa = mGA.genetic_optimization(alfa,
+                                          Xl_smoth, Yl_smoth,
+                                          Xr_smoth, Yr_smoth,
+                                          population_size,
+                                          epochs,
+                                          min_fit,
+                                          alfa_whats_shorter)
 
     # obliczenie optymalej trasy na podstawie optymalnego alfa
     X_opt, Y_opt = calc.x_and_y_from_alfa(optim_alfa, Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth)
 
     # wyświetlenie trasy pokonanej przez robota oraz obliczonych ograniczń obustronnych
     pyplot.figure(4)
-    pyplot.plot(X_maybe, Y_maybe)
-    pyplot.plot(X_not_opt, Y_not_opt)
-    # pyplot.plot(Xl_smoth, Yl_smoth)
-    # pyplot.plot(Xr_smoth, Yr_smoth)
+    pyplot.plot(X_opt, Y_opt)
+    # pyplot.plot(X_not_opt, Y_not_opt)
+    pyplot.plot(Xl_smoth, Yl_smoth)
+    pyplot.plot(Xr_smoth, Yr_smoth)
     pyplot.xlim([0, gray_img_arr.shape[1]])
     pyplot.ylim([gray_img_arr.shape[0], 0])
     # pyplot.legend(["najkrótsza trasa", "bez optymalizacji","lewa granica", "prawa granica"])
