@@ -34,8 +34,20 @@ population_with_qual[2, 0] = c1
 sorted = np.flip(population_with_qual[population_with_qual[:, 0].argsort()], axis=0)
 
 
+x = np.random.random(1000)
+print(x)
+x_smothed = np.zeros_like(x)
+prev = 0
 
+for i in range(len(x)):
+    x_smothed[i] = (x[i] * 0.01) + (prev * 0.99)
+    prev = x_smothed[i]
 
+print(x_smothed)
+pyplot.figure(1)
+pyplot.plot(x)
+pyplot.plot(x_smothed)
+pyplot.show()
 
 print(random.randint(0, 9))
 
@@ -45,4 +57,14 @@ print(random.randint(0, 9))
 BBB = np.full(5, True)
 
 print(BBB)
+
+
+prev = 9
+prev_2 = 12
+
+prev_2 = prev
+prev = 8
+
+print("prev:", prev, "prev_2", prev_2)
+
 

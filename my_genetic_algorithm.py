@@ -103,6 +103,23 @@ def genetic_optimization(alfa, xl, yl, xr, yr, solutions_number, epochs, min_fit
         if best_resoult_fit < min_fit:
             break
 
+        # filtrowanie
+        smothed_best_resoult = np.zeros_like(best_resoult)
+        prev = 0
+        prev_2 = 0
+        ratio = 0.05
+        if (i+1) % 5 == 0:
+            for s in range(n):
+                smothed_best_resoult[s] = best_resoult[s] * ratio + prev * 0.5 * (1 - ratio) + prev_2 * 0.5 * (1 - ratio)
+                prev_2 = prev
+                prev = smothed_best_resoult[s]
+            if i != epochs-1:
+                for o in range(n):
+                    if edges[o] == 1:
+                        smothed_best_resoult[o] = 1
+                    if edges[o] == 0:
+                        smothed_best_resoult[o] = 0
+            best_solutions[0, :] = smothed_best_resoult
 
         # generacja nowej populacji - mutajcje
         new_population = np.zeros_like(my_population)
