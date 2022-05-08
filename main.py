@@ -2,8 +2,7 @@ from matplotlib import pyplot
 import numpy as np
 import calculations as calc
 from PIL import Image, ImageOps
-from genetic_algoritm import genetic_optimization
-import my_genetic_algorithm as mGA
+import algorithms as mGA
 
 
 
@@ -37,90 +36,33 @@ def main():
     # K_before_smoothing = calc.calculate_curvature(X_after_1st_ride, Y_after_1st_ride)
     # K_after_smoothing = calc.calculate_curvature(X_vect_smoth, Y_vect_smoth)
 
-    # wykreślenie krzywizn przed i po wygładzaniu
-    # pyplot.figure(1)
-    # pyplot.plot(K_before_smoothing)
-    # pyplot.plot(K_after_smoothing)
-    # pyplot.xlim([0, gray_img_arr.shape[1]])
-    # pyplot.ylim([gray_img_arr.shape[0], 0])
-    # pyplot.legend(["Krzywizna przed wygładzeniem", "Krzywizna po wygładzeniu"])
-
-    # wyświetlenie trasy pokonanej przez robota oraz obliczonych ograniczń obustronnych
-    # pyplot.figure(2)
-    # pyplot.plot(X_after_1st_ride, Y_after_1st_ride)
-    # pyplot.plot(Xl_smoth, Yl_smoth)
-    # pyplot.plot(Xr_smoth, Yr_smoth)
-    # pyplot.xlim([0, gray_img_arr.shape[1]])
-    # pyplot.ylim([gray_img_arr.shape[0], 0])
-    # pyplot.legend(["droga po 1 przejeździe", "lewa granica", "prawa granica"])
-    # pyplot.show()
-
-
-    # print("X_vect_smoth:", len(X_vect_smoth), "Y_vect_smoth:", len(Y_vect_smoth))
-    # print("Xl_smoth:", len(Xl_smoth), "Yl_smoth:", len(Yl_smoth))
-    # print("Xr_smoth:", len(Xr_smoth), "Yr_smoth:", len(Yr_smoth))
-
     # obliczenie wskaźnika do minimalizacji
     H = calc.H_matrix(Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth)
     B = calc.B_matrix(Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth)
     alfa = np.full(len(B), 0.5)
 
-    # wyznaczenie optymalnej wartości alfa
-    # population_size = 100
-    # epochs = 2000
-    # min_fit = 50
-    # catcher = np.asarray(genetic_optimization(alfa,
-    #                                           Xl_smoth, Yl_smoth,
-    #                                           Xr_smoth, Yr_smoth,
-    #                                           population_size, epochs, min_err), dtype=object)
-    # optim_alfa = np.asarray(catcher[1])
-
-
-
-
     # obliczenie NIEoptymalej trasy na podstawie ustalonego alfa
     X_not_opt, Y_not_opt = calc.x_and_y_from_alfa(alfa, Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth)
 
     # obliczenia dla znaleznienia alfa określającego krótsze krawędzie
-    filtration = 5
-    strength = 0.65
-    alfa_whats_shorter = calc.find_shortest_edges(Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth, strength, filtration)
-    X_maybe, Y_maybe = calc.x_and_y_from_alfa(alfa_whats_shorter, Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth)
+    strength = 0.4
+    alfa_whats_shorter = calc.find_shortest_edges(Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth, strength)
 
-    prev_1_val = 0
-    prev = 0
-    curr = 0
-    start = False
-    go_again = True
-    alfa_whats_even_shorter = alfa_whats_shorter.copy()
-    for i in range(len(alfa_whats_shorter)):
-        if (alfa_whats_shorter[i] == 1 or alfa_whats_shorter[i] == 0) and go_again:
-            prev = i
-            start = True
-            go_again = False
-        if start:
-            curr = i
-            if alfa_whats_shorter[curr] == alfa_whats_shorter[prev]:
-                alfa_whats_even_shorter[prev:curr+1] = alfa_whats_shorter[curr]
-                prev = curr
-            if alfa_whats_shorter[curr] != alfa_whats_shorter[prev] and alfa_whats_shorter[curr] != 0.5:
-                prev = curr
+    X_maybe_, Y_maybe_ = calc.x_and_y_from_alfa(alfa_whats_shorter, Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth)
 
+    # # wyświetlenie podziału na dłuższe i krótsze krawędzie
+    # pyplot.figure(9)
+    # pyplot.plot(X_maybe_, Y_maybe_)
+    # pyplot.plot(Xl_smoth, Yl_smoth)
+    # pyplot.plot(Xr_smoth, Yr_smoth)
+    # pyplot.xlim([0, gray_img_arr.shape[1]])
+    # pyplot.ylim([gray_img_arr.shape[0], 0])
+    # pyplot.show()
 
-    X_maybe_, Y_maybe_ = calc.x_and_y_from_alfa(alfa_whats_even_shorter, Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth)
-
-    pyplot.figure(9)
-    pyplot.plot(X_maybe_, Y_maybe_)
-    pyplot.plot(Xl_smoth, Yl_smoth)
-    pyplot.plot(Xr_smoth, Yr_smoth)
-    pyplot.xlim([0, gray_img_arr.shape[1]])
-    pyplot.ylim([gray_img_arr.shape[0], 0])
-    pyplot.show()
-
-
+    # realizacja algorytmyu genetycznego
 
     population_size = 100
-    epochs = 200
+    epochs = 2
     min_fit = 1200
     optim_alfa = mGA.genetic_optimization(alfa,
                                           Xl_smoth, Yl_smoth,
@@ -128,7 +70,7 @@ def main():
                                           population_size,
                                           epochs,
                                           min_fit,
-                                          alfa_whats_even_shorter)
+                                          alfa_whats_shorter)
 
     # obliczenie optymalej trasy na podstawie optymalnego alfa
     X_opt, Y_opt = calc.x_and_y_from_alfa(optim_alfa, Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth)
@@ -144,30 +86,35 @@ def main():
     pyplot.ylim([gray_img_arr.shape[0], 0])
     # pyplot.legend(["najkrótsza trasa", "bez optymalizacji","lewa granica", "prawa granica"])
 
-    # print("Pierwsze 50 elementów macierzy alfa:", optim_alfa[:50])
-
-    # # wyświetlenie trasy pokonanej przez robota oraz obliczonych ograniczń obustronnych
-    # pyplot.figure(4)
-    # pyplot.plot(X_opt, Y_opt)
-    # pyplot.plot(X_not_opt, Y_not_opt)
-    # pyplot.plot(Xl_smoth, Yl_smoth)
-    # pyplot.plot(Xr_smoth, Yr_smoth)
-    # pyplot.xlim([0, gray_img_arr.shape[1]])
-    # pyplot.ylim([gray_img_arr.shape[0], 0])
-    # pyplot.legend(["najkrótsza trasa", "bez optymalizacji","lewa granica", "prawa granica"])
-
     # obliczenie długości lewego i prawego ograniczenia oraz optymalnej trasy
-    n = Xr_smoth
-    S2_l = 0
-    S2_r = 0
-    S2_opt = 0
-    for i in range(1, len(n)):
-        S2_l += (Xl_smoth[i] - Xl_smoth[i-1]) ** 2 + (Yl_smoth[i] - Yl_smoth[i-1]) ** 2
-        S2_r += (Xr_smoth[i] - Xr_smoth[i-1]) ** 2 + (Yr_smoth[i] - Yr_smoth[i-1]) ** 2
-        S2_opt += (X_opt[i] - X_opt[i-1]) ** 2 + (Y_opt[i] - Y_opt[i-1]) ** 2
+    alfa_all_left = np.full_like(Xl_smoth, 1)
+    alfa_all_right = np.full_like(Xl_smoth, 0)
+
+    X_l, Y_l = calc.x_and_y_from_alfa(alfa_all_left, Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth)
+    S2_l = calc.length_of_route(X_l, Y_l)
+
+    X_r, Y_r = calc.x_and_y_from_alfa(alfa_all_right, Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth)
+    S2_r = calc.length_of_route(X_r, Y_r)
+
+    S2_opt = calc.length_of_route(X_opt, Y_opt)
+
     print("s2_l:", S2_l, "s2_r:", S2_r,  "s2_opt:", S2_opt)
 
     pyplot.show()
+
+
+
+    # realizacja algorytmyu genetycznego
+    population_size = 1
+    epochs = 10
+    min_fit = 1200
+    optim_alfa = mGA.genetic_optimization_with_linearization(alfa,
+                                                    Xl_smoth, Yl_smoth,
+                                                    Xr_smoth, Yr_smoth,
+                                                    population_size,
+                                                    epochs,
+                                                    min_fit,
+                                                    alfa_whats_shorter)
 
 
 if __name__ == "__main__":

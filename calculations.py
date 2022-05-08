@@ -608,14 +608,14 @@ def length_of(xl, yl, xr, yr):
     return len_l, len_r
 
 
-def find_shortest_edges(xl, yl, xr, yr, strength, filtration):
+def find_shortest_edges(xl, yl, xr, yr, strength):
     # obliczanie długości fragmentów trasy
     len_l = np.zeros_like(xl)
     len_r = np.zeros_like(xl)
     count = 10
     alfa_whats_longer = np.full_like(xl, 0.5)
-    alfa_whats_longer_new = np.full_like(xl, 0.5)
 
+    # odcinkowe sprawdzanie która strona jest dłuższa
     for j in range(len(len_l)-count):
         Xl_smoth_short = xl[j:j+count]
         Yl_smoth_short = yl[j:j+count]
@@ -629,18 +629,24 @@ def find_shortest_edges(xl, yl, xr, yr, strength, filtration):
         else:
             alfa_whats_longer[j] = 0.5
 
-    zero_counter = 0
-    one_counter = 0
-    how_many = filtration
+    # filtrowanie niepotrzebnych zmian np. 0 0 0.5 0 -> 0 0 0 0
+    alfa_whats_longer_new = alfa_whats_longer.copy()
+    prev = 0
+    curr = 0
+    start = False
+    go_again = True
+    alfa_whats_longer_newer = alfa_whats_longer_new.copy()
+    for i in range(len(alfa_whats_longer_newer)):
+        if (alfa_whats_longer_new[i] == 1 or alfa_whats_longer_new[i] == 0) and go_again:
+            prev = i
+            start = True
+            go_again = False
+        if start:
+            curr = i
+            if alfa_whats_longer_new[curr] == alfa_whats_longer_new[prev]:
+                alfa_whats_longer_newer[prev:curr+1] = alfa_whats_longer_new[curr]
+                prev = curr
+            if alfa_whats_longer_new[curr] != alfa_whats_longer_new[prev] and alfa_whats_longer_new[curr] != 0.5:
+                prev = curr
 
-    # proste filtrowanie
-    for i in range(how_many, len(alfa_whats_longer)):
-        suma = sum(alfa_whats_longer[i-how_many:i])
-        if suma > how_many*0.8:
-            alfa_whats_longer_new[i] = 1
-        elif suma > how_many*0.4:
-            alfa_whats_longer_new[i] = 0.5
-        else:
-            alfa_whats_longer_new[i] = 0
-
-    return alfa_whats_longer_new
+    return alfa_whats_longer_newer
