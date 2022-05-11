@@ -171,22 +171,20 @@ def generate_population_linearized(edg, sol_num, n):
             if x == 0:
                 beginning = start[x]
                 ending = random.randint(end[x], end[x] + int((start[x+1] - end[x]) / 2))
-                print(beginning, ending)
                 subject[beginning: ending] = linear_connection(beginning, ending, 1, rising)
 
             elif x == (section_count - 1):
                 beginning = random.randint(ending, start[x])
                 ending = end[x]
-                print(beginning, ending)
                 subject[beginning: ending] = linear_connection(beginning, ending, 3, rising)
 
             else:
                 beginning = random.randint(ending, start[x])
                 ending = random.randint(end[x], end[x] + int((start[x+1] - end[x]) / 2))
-                print(beginning, ending)
                 subject[beginning: ending] = linear_connection(beginning, ending, 2, rising)
+        population[j, :] = subject
 
-    return subject
+    return population
 
 
 # interpolacja liniowa pomiędzy dwoma punktami
@@ -213,6 +211,73 @@ def linear_connection(start, end, pos, rising):
     return line
 
 
+# funkcja odpowiedzialna za mutację
+def mutate_linear(to_change):
+    n = len(to_change)
+    edg = np.full_like(to_change, 0.5)
+
+    for i in range(n):
+        if to_change[i] == 0:
+            edg[i] = 0
+        elif to_change[i] == 1:
+            edg[i] = 1
+
+    # Pierwszy wierwsz to indeksy startowych wartości, a drugi to indeksy końcowych wartości
+    start = np.array([0], dtype=int)
+    end = np.array([], dtype=int)
+    prev = edg[0]
+    counter = 0
+    for i in range(len(edg)):
+        if edg[i] != prev:
+            counter += 1
+            prev = edg[i]
+            if counter % 2 == 0:
+                start = np.append(start, i)
+            if counter % 2 == 1:
+                end = np.append(end, i)
+    end = np.append(end, n)
+    section_count = len(start)
+
+    subject = edg
+
+    for x in range(section_count):
+        rising = True if edg[end[x]-1] > edg[start[x]-1] else False
+        a = 5
+        if x == 0:
+            beginning = start[x]
+            ending = end[x] + random.randint(-a, a)
+            # print(beginning, ending)
+            subject[beginning: ending] = linear_connection(beginning, ending, 1, rising)
+
+        elif x == (section_count - 1):
+            beginning = start[x] + random.randint(-a, a)
+            ending = end[x]
+
+            if beginning > ending:
+                beginning = start[x]
+            # print(beginning, ending)
+            subject[beginning: ending] = linear_connection(beginning, ending, 3, rising)
+
+        else:
+            beginning = start[x] + random.randint(-a, a)
+            ending = end[x] + random.randint(-a, a)
+
+            if beginning > ending:
+                beginning = start[x] + random.randint(-a, 0)
+                ending = end[x] + random.randint(0, a)
+
+            if ending < end[x]:
+                subject[ending: end[x]] = int(rising)
+
+            if beginning > start[x]:
+                subject[start[x]: beginning] = int(not rising)
+
+            # print(beginning, ending)
+            subject[beginning: ending] = linear_connection(beginning, ending, 2, rising)
+
+    return subject
+
+
 # sam w sobie alg gen
 def genetic_optimization_with_linearization(alfa, xl, yl, xr, yr, solutions_number, epochs, min_fit, edges):
     # długość wektora do minimalizacji
@@ -226,68 +291,43 @@ def genetic_optimization_with_linearization(alfa, xl, yl, xr, yr, solutions_numb
 
     # generowanie pierwszej grupy rozwiązań - populacja początkowa
     my_population = generate_population_linearized(edges, solutions_number, n)
-    # print(my_population[0:24])
-    # my_population = np.full_like(my_population, 0.8)
-    X_l, Y_l = calc.x_and_y_from_alfa(my_population, xl, yl, xr, yr)
-    pyplot.figure(41)
-    pyplot.plot(xl, yl)
-    pyplot.plot(xr, yr)
-    pyplot.plot(X_l, Y_l)
-    pyplot.show()
 
+    # algorytm genetyczny sam w sobie
+    for i in range(epochs):
+        # zapisanie talbicy z populacją do tablicy z populacją powiększonej o wskaźnik jakości
+        population_with_qual[:, 1:n+1] = my_population
 
-    # # algorytm genetyczny sam w sobie
-    # for i in range(epochs):
-    #     # zapisanie talbicy z populacją do tablicy z populacją powiększonej o wskaźnik jakości
-    #     population_with_qual[:, 1:n+1] = my_population
-    #
-    #     # obliczenie wskaźnika jakości dla każdego osobnika
-    #     for k in range(solutions_number):
-    #         subject = my_population[k, :]
-    #         population_with_qual[k, 0] = quality(subject, xl, yl, xr, yr)
-    #
-    #     # sortowanie tablicy względem malejącego wskaźnika jakości
-    #     sorted_population_with_qual = population_with_qual[population_with_qual[:, 0].argsort()]
-    #     best_resoult = sorted_population_with_qual[0, 1:n+1]
-    #     best_resoult_fit = sorted_population_with_qual[0, 0]
-    #
-    #     # najlepsze 10%
-    #     best_solutions = sorted_population_with_qual[0:solutions_number//10, 1:n+1]
-    #
-    #     print("iteration number:", i + 1, "vall:", best_resoult_fit)
-    #
-    #     if best_resoult_fit < min_fit:
-    #         break
-    #
-    #     # filtrowanie
-    #     smothed_best_resoult = np.zeros_like(best_resoult)
-    #     prev = 0
-    #     prev_2 = 0
-    #     ratio = 0.05
-    #     if (i+1) % 5 == 0 or i == 0:
-    #         for s in range(n):
-    #             smothed_best_resoult[s] = best_resoult[s] * ratio + prev * 0.5 * (1 - ratio) + prev_2 * 0.5 * (1 - ratio)
-    #             prev_2 = prev
-    #             prev = smothed_best_resoult[s]
-    #         if i != epochs-1:
-    #             for o in range(n):
-    #                 if edges[o] == 1:
-    #                     smothed_best_resoult[o] = 1
-    #                 if edges[o] == 0:
-    #                     smothed_best_resoult[o] = 0
-    #         best_solutions[0, :] = smothed_best_resoult
-    #
-    #     # generacja nowej populacji - mutajcje
-    #     new_population = np.zeros_like(my_population)
-    #     new_population[0:solutions_number//10, :] = best_solutions
-    #     for j in range(solutions_number//10, solutions_number):
-    #         to_pass = best_solutions[random.randint(0, solutions_number//10 - 1), :]
-    #         new_population[j, :] = mutate(to_pass, edges)
-    #
-    #     # zapisanie nowej populacji do zmiennej aktualną populacją
-    #     my_population = new_population
+        # obliczenie wskaźnika jakości dla każdego osobnika
+        for k in range(solutions_number):
+            subject_ = my_population[k, :]
+            population_with_qual[k, 0] = quality(subject_, xl, yl, xr, yr)
 
-    # return best_resoult
+        # sortowanie tablicy względem malejącego wskaźnika jakości
+        sorted_population_with_qual = population_with_qual[population_with_qual[:, 0].argsort()]
+        best_resoult = sorted_population_with_qual[0, 1:n+1]
+        best_resoult_fit = sorted_population_with_qual[0, 0]
+
+        # najlepsze 10%
+        best_solutions = sorted_population_with_qual[0:solutions_number//10, 1:n+1]
+
+        print("iteration number:", i + 1, "vall:", best_resoult_fit)
+
+        # print(sorted_population_with_qual[0:5, 0])
+
+        if best_resoult_fit < min_fit:
+            break
+
+        # generacja nowej populacji - mutajcje
+        new_population = np.zeros_like(my_population)
+        new_population[0:solutions_number//10, :] = best_solutions
+        for j in range(solutions_number//10, solutions_number):
+            to_pass = best_solutions[random.randint(0, solutions_number//10 - 1), :]
+            new_population[j, :] = mutate_linear(to_pass)
+
+        # zapisanie nowej populacji do zmiennej aktualną populacją
+        my_population = new_population
+
+    return best_resoult
 
 
 

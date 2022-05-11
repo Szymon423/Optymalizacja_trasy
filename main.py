@@ -62,8 +62,8 @@ def main():
     # realizacja algorytmyu genetycznego
 
     population_size = 100
-    epochs = 2
-    min_fit = 1200
+    epochs = 1
+    min_fit = 1500
     optim_alfa = mGA.genetic_optimization(alfa,
                                           Xl_smoth, Yl_smoth,
                                           Xr_smoth, Yr_smoth,
@@ -74,17 +74,17 @@ def main():
 
     # obliczenie optymalej trasy na podstawie optymalnego alfa
     X_opt, Y_opt = calc.x_and_y_from_alfa(optim_alfa, Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth)
-
+    # optim_alfa
     # wyświetlenie trasy pokonanej przez robota oraz obliczonych ograniczń obustronnych
-    pyplot.figure(4)
+    # pyplot.figure(4)
 
     # pyplot.plot(X_not_opt, Y_not_opt)
-    pyplot.plot(Xl_smoth, Yl_smoth)
-    pyplot.plot(Xr_smoth, Yr_smoth)
-    pyplot.plot(X_opt, Y_opt)
-    pyplot.xlim([0, gray_img_arr.shape[1]])
-    pyplot.ylim([gray_img_arr.shape[0], 0])
-    # pyplot.legend(["najkrótsza trasa", "bez optymalizacji","lewa granica", "prawa granica"])
+    # pyplot.plot(Xl_smoth, Yl_smoth)
+    # pyplot.plot(Xr_smoth, Yr_smoth)
+    # pyplot.plot(X_opt, Y_opt)
+    # pyplot.xlim([0, gray_img_arr.shape[1]])
+    # pyplot.ylim([gray_img_arr.shape[0], 0])
+    # # pyplot.legend(["najkrótsza trasa", "bez optymalizacji","lewa granica", "prawa granica"])
 
     # obliczenie długości lewego i prawego ograniczenia oraz optymalnej trasy
     alfa_all_left = np.full_like(Xl_smoth, 1)
@@ -100,22 +100,30 @@ def main():
 
     print("s2_l:", S2_l, "s2_r:", S2_r,  "s2_opt:", S2_opt)
 
-    pyplot.show()
-
-
 
     # realizacja algorytmyu genetycznego
-    population_size = 1
-    epochs = 10
+    population_size = 2000
+    epochs = 100
     min_fit = 1200
-    optim_alfa = mGA.genetic_optimization_with_linearization(alfa,
-                                                    Xl_smoth, Yl_smoth,
-                                                    Xr_smoth, Yr_smoth,
-                                                    population_size,
-                                                    epochs,
-                                                    min_fit,
-                                                    alfa_whats_shorter)
+    linear_alfa = mGA.genetic_optimization_with_linearization(alfa,
+                                                            Xl_smoth, Yl_smoth,
+                                                            Xr_smoth, Yr_smoth,
+                                                            population_size,
+                                                            epochs,
+                                                            min_fit,
+                                                            alfa_whats_shorter)
 
+    X_linear, Y_linear = calc.x_and_y_from_alfa(linear_alfa, Xl_smoth, Yl_smoth, Xr_smoth, Yr_smoth)
+    S2_opt_linear = calc.length_of_route(X_linear, Y_linear)
+    print("s2_l:", S2_l, "s2_r:", S2_r,  "s2_opt:", S2_opt_linear)
+
+    pyplot.plot(Xl_smoth, Yl_smoth)
+    pyplot.plot(Xr_smoth, Yr_smoth)
+    pyplot.plot(X_linear, Y_linear)
+    pyplot.xlim([0, gray_img_arr.shape[1]])
+    pyplot.ylim([gray_img_arr.shape[0], 0])
+    pyplot.legend(["prawa granica", "lewa granica", "najkrótsza trasa"])
+    pyplot.show()
 
 if __name__ == "__main__":
     main()
