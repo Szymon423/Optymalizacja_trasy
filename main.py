@@ -1,12 +1,43 @@
 from matplotlib import pyplot
 import numpy as np
 import calculations as calc
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, ImageTk
 import algorithms as mGA
-
+import tkinter as tk
+from tkinter import filedialog
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 
 
 def main():
+    # generacja przestrzeni GUI
+    root = tk.Tk()
+    root.title("Wykres w GUI")
+    root.geometry("1200x800")
+
+    # obsługa przycisku z wyborem zdjęcia/trasy
+    def get_file_loc():
+        root.filename = filedialog.askopenfilename(initialdir=r"Z:\Edukacja\Politechnika\Studia Magisterskie\1 semestr\Optymalizacja\Optymalizacja_trasy",
+                                                   title="Select photo with route",
+                                                   filetypes=[("BMP files", "*.bmp")])
+        my_label1 = tk.Label(root, text=root.filename)
+        my_label1.grid(row=2, column=1, padx=10, pady=10)
+
+        img_ = Image.open(root.filename)
+        img_.show()
+        my_img = ImageTk.BitmapImage(file=img_.convert("1"))
+        my_label2 = tk.Label(image=my_img)
+        my_label2.grid(row=1, column=1, padx=10, pady=10)
+
+
+    # generacja przycisku do wyboru zdjęcia/trasy
+    b_choice_route = tk.Button(root, text="load route", height=2, width=15, command=get_file_loc)
+    b_choice_route.grid(row=0, column=0, padx=10, pady=10)
+
+
+    root.mainloop()
+
+
     # import zdjęcia
     img = Image.open("test_3.bmp")
     gray_img = ImageOps.grayscale(img)
@@ -124,6 +155,9 @@ def main():
     pyplot.ylim([gray_img_arr.shape[0], 0])
     pyplot.legend(["prawa granica", "lewa granica", "najkrótsza trasa"])
     pyplot.show()
+
+
+
 
 if __name__ == "__main__":
     main()
