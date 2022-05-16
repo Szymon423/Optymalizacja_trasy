@@ -21,4 +21,6 @@ Na ten moment w programie zaimplementowane jest:
 
   Filtrowanie, a właściwie uśrednianie pozwala na pozbycie się poszarpanych krawędzie przy tworzeniu ograniczeń trasy
 
-- Ogarnięte jest !!!
+- wykrywanie najkrószej ścieżki za pomocą algorytmu genetycznego bazujący na losowej mutacji (działa poprawnie, ale nie jest najlepszy)
+
+- wykrywanie najkrótszej ścieżki za pomocą algortymu genetycznego bazującego na interpolacji liniowej (jest w miarę ok - zwiększenie liczby epok lub popluacji nie poprawia znacząco działania AG)
