@@ -584,6 +584,7 @@ def B_matrix(xl, yl, xr, yr):
 def calc_delta(l, r, i):
     return l[i] - r[i]
 
+
 def x_and_y_from_alfa(alfa, xl, yl, xr, yr):
     x = xr + alfa * (xl - xr)
     y = yr + alfa * (yl - yr)
