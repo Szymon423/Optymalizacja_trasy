@@ -1,5 +1,5 @@
 
-from algorithms import GeneticAlgorithmRandomized
+# from algorithms import GeneticAlgorithmRandomized
 import calculations as calc
 
 
@@ -10,5 +10,5 @@ class RouteOptimisation:
         """inicjalizacja obiektu klasy route optimization"""
 
         # inicjalizacja pierwszego algorytmu
-        self.ga_random = GeneticAlgorithmRandomized()
+        # self.ga_random = GeneticAlgorithmRandomized()
 

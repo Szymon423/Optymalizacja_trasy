@@ -2,7 +2,7 @@ from matplotlib import pyplot
 import random
 import numpy as np
 import calculations as calc
-from settings import Settings
+from data import Data
 #########################################################################
 #########################################################################
 #                                                                       #
@@ -12,130 +12,131 @@ from settings import Settings
 #########################################################################
 
 
-class GeneticAlgorithmRandomized:
-    """klasa do obsługi algorytmu genetycznego z randomową mutacją"""
+def quality(alfa, Xl, Yl, Xr, Yr):
+    """wskaźnik jakości"""
+    X, Y = calc.x_and_y_from_alfa(alfa, Xl, Yl, Xr, Yr)
+    to_return = calc.length_of_route(X, Y)
+    return to_return
 
-    def __init__(self):
-        """inicjalizacja obiektu AG"""
-        self.settings = Settings()
 
-    def quality(self, alfa, Xl, Yl, Xr, Yr):
-        """wskaźnik jakości"""
-        X, Y = calc.x_and_y_from_alfa(alfa, Xl, Yl, Xr, Yr)
-        to_return = calc.length_of_route(X, Y)
-        return to_return
+def generate_population(edg, sol_num, n):
+    """metoda odpowiedizalna za generowanie populacji"""
+    population = np.full((sol_num, n), 0.5)
 
-    def generate_population(self, edg, sol_num, n):
-        """metoda odpowiedizalna za generowanie populacji"""
-        population = np.full((sol_num, n), 0.5)
-
-        for ii in range(sol_num):
-            sample = np.full(n, 0.5)
-            for o in range(n):
-                if edg[o] == 1:
+    for ii in range(sol_num):
+        sample = np.full(n, 0.5)
+        for o in range(n):
+            if edg[o] == 1:
+                sample[o] = 1
+            elif edg[o] == 0:
+                sample[o] = 0
+            else:
+                a = 0.5 * random.uniform(0.1, 2.5)
+                if a > 1:
                     sample[o] = 1
-                elif edg[o] == 0:
+                elif a < 0:
                     sample[o] = 0
                 else:
-                    a = 0.5 * random.uniform(0.1, 2.5)
-                    if a > 1:
-                        sample[o] = 1
-                    elif a < 0:
-                        sample[o] = 0
-                    else:
-                        sample[o] = a
+                    sample[o] = a
 
-            population[ii, :] = sample
+        population[ii, :] = sample
 
-        return population
+    return population
 
-    def mutate(self, to_change, edg):
-        """metoda odpowiedzialna za mutację"""
-        size = len(to_change)
-        to_return = np.full(size, 0.5)
-        for o in range(size):
-            if edg[o] == 1:
+
+def mutate(to_change, edg):
+    """metoda odpowiedzialna za mutację"""
+    size = len(to_change)
+    to_return = np.full(size, 0.5)
+    for o in range(size):
+        if edg[o] == 1:
+            to_return[o] = 1
+        elif edg[o] == 0:
+            to_return[o] = 0
+        else:
+            a = to_change[o]*random.uniform(0.95, 1.05)
+            if a > 1:
                 to_return[o] = 1
-            elif edg[o] == 0:
+            elif a < 0:
                 to_return[o] = 0
             else:
-                a = to_change[o]*random.uniform(0.95, 1.05)
-                if a > 1:
-                    to_return[o] = 1
-                elif a < 0:
-                    to_return[o] = 0
-                else:
-                    to_return[o] = a
+                to_return[o] = a
 
-        return to_return
+    return to_return
 
-    def genetic_optimization(self, alfa, xl, yl, xr, yr, solutions_number, epochs, min_fit, edges):
-        """algorytm sam w sobie"""
-        # długość wektora do minimalizacji
-        n = len(alfa)
 
-        # wektor z populacją - macierz gdzie każdy wiersz zawiera pełen wektor z rozwiązaniami - alfa
-        my_population = np.zeros((solutions_number, n))
+def genetic_optimization(self, alfa, xl, yl, xr, yr, solutions_number, epochs, min_fit, edges):
+    """algorytm sam w sobie"""
+    # długość wektora do minimalizacji
+    n = len(alfa)
 
-        # generacja wektora, którego elementami są poszczególne rozwiązania
-        # oraz wartości z funkcji fitness
-        population_with_qual = np.zeros((solutions_number, n + 1))
+    # wektor z populacją - macierz gdzie każdy wiersz zawiera pełen wektor z rozwiązaniami - alfa
+    my_population = np.zeros((solutions_number, n))
 
-        # generowanie pierwszej grupy rozwiązań - populacja początkowa
-        my_population = generate_population(edges, solutions_number, n)
+    # generacja wektora, którego elementami są poszczególne rozwiązania
+    # oraz wartości z funkcji fitness
+    population_with_qual = np.zeros((solutions_number, n + 1))
 
-        # algorytm genetyczny sam w sobie
-        for i in range(epochs):
-            # zapisanie talbicy z populacją do tablicy z populacją powiększonej o wskaźnik jakości
-            population_with_qual[:, 1:n+1] = my_population
+    # generowanie pierwszej grupy rozwiązań - populacja początkowa
+    my_population = generate_population(edges, solutions_number, n)
 
-            # obliczenie wskaźnika jakości dla każdego osobnika
-            for k in range(solutions_number):
-                subject = my_population[k, :]
-                population_with_qual[k, 0] = quality(subject, xl, yl, xr, yr)
+    # algorytm genetyczny sam w sobie
+    for i in range(epochs):
+        # zapisanie talbicy z populacją do tablicy z populacją powiększonej o wskaźnik jakości
+        population_with_qual[:, 1:n+1] = my_population
 
-            # sortowanie tablicy względem malejącego wskaźnika jakości
-            sorted_population_with_qual = population_with_qual[population_with_qual[:, 0].argsort()]
-            best_resoult = sorted_population_with_qual[0, 1:n+1]
-            best_resoult_fit = sorted_population_with_qual[0, 0]
+        # obliczenie wskaźnika jakości dla każdego osobnika
+        for k in range(solutions_number):
+            subject = my_population[k, :]
+            population_with_qual[k, 0] = quality(subject, xl, yl, xr, yr)
 
-            # najlepsze 10%
-            best_solutions = sorted_population_with_qual[0:solutions_number//10, 1:n+1]
+        # sortowanie tablicy względem malejącego wskaźnika jakości
+        sorted_population_with_qual = population_with_qual[population_with_qual[:, 0].argsort()]
+        best_resoult = sorted_population_with_qual[0, 1:n+1]
+        best_resoult_fit = sorted_population_with_qual[0, 0]
 
-            print("iteration number:", i + 1, "vall:", best_resoult_fit)
 
-            if best_resoult_fit < min_fit:
-                break
+        # najlepsze 10%
+        best_solutions = sorted_population_with_qual[0:solutions_number//10, 1:n+1]
 
-            # filtrowanie
-            smothed_best_resoult = np.zeros_like(best_resoult)
-            prev = 0
-            prev_2 = 0
-            ratio = 0.05
-            if (i+1) % 5 == 0 or i == 0:
-                for s in range(n):
-                    smothed_best_resoult[s] = best_resoult[s] * ratio + prev * 0.5 * (1 - ratio) + prev_2 * 0.5 * (1 - ratio)
-                    prev_2 = prev
-                    prev = smothed_best_resoult[s]
-                if i != epochs-1:
-                    for o in range(n):
-                        if edges[o] == 1:
-                            smothed_best_resoult[o] = 1
-                        if edges[o] == 0:
-                            smothed_best_resoult[o] = 0
-                best_solutions[0, :] = smothed_best_resoult
+        print("iteration number:", i + 1, "vall:", best_resoult_fit)
 
-            # generacja nowej populacji - mutajcje
-            new_population = np.zeros_like(my_population)
-            new_population[0:solutions_number//10, :] = best_solutions
-            for j in range(solutions_number//10, solutions_number):
-                to_pass = best_solutions[random.randint(0, solutions_number//10 - 1), :]
-                new_population[j, :] = mutate(to_pass, edges)
+        if best_resoult_fit < min_fit:
+            break
 
-            # zapisanie nowej populacji do zmiennej aktualną populacją
-            my_population = new_population
+        # filtrowanie
+        smothed_best_resoult = np.zeros_like(best_resoult)
+        prev = 0
+        prev_2 = 0
+        ratio = 0.05
+        if (i+1) % 5 == 0 or i == 0:
+            for s in range(n):
+                smothed_best_resoult[s] = best_resoult[s] * ratio + prev * 0.5 * (1 - ratio) + prev_2 * 0.5 * (1 - ratio)
+                prev_2 = prev
+                prev = smothed_best_resoult[s]
+            if i != epochs-1:
+                for o in range(n):
+                    if edges[o] == 1:
+                        smothed_best_resoult[o] = 1
+                    if edges[o] == 0:
+                        smothed_best_resoult[o] = 0
+            best_solutions[0, :] = smothed_best_resoult
 
-        return best_resoult
+        self.alfa = best_solutions[0, :]
+        if i > 0:
+            self._plot()
+
+        # generacja nowej populacji - mutajcje
+        new_population = np.zeros_like(my_population)
+        new_population[0:solutions_number//10, :] = best_solutions
+        for j in range(solutions_number//10, solutions_number):
+            to_pass = best_solutions[random.randint(0, solutions_number//10 - 1), :]
+            new_population[j, :] = mutate(to_pass, edges)
+
+        # zapisanie nowej populacji do zmiennej aktualną populacją
+        my_population = new_population
+        self.root.update()
+    return best_resoult
 
 
 #########################################################################
@@ -284,7 +285,7 @@ def mutate_linear(to_change):
 
 
 # sam w sobie alg gen
-def genetic_optimization_with_linearization(alfa, xl, yl, xr, yr, solutions_number, epochs, min_fit, edges):
+def genetic_optimization_with_linearization(self, alfa, xl, yl, xr, yr, solutions_number, epochs, min_fit, edges):
     # długość wektora do minimalizacji
     n = len(alfa)
 
@@ -311,6 +312,8 @@ def genetic_optimization_with_linearization(alfa, xl, yl, xr, yr, solutions_numb
         sorted_population_with_qual = population_with_qual[population_with_qual[:, 0].argsort()]
         best_resoult = sorted_population_with_qual[0, 1:n+1]
         best_resoult_fit = sorted_population_with_qual[0, 0]
+        # my_population = best_resoult
+        self.root.update()
 
         # najlepsze 10%
         best_solutions = sorted_population_with_qual[0:solutions_number//10, 1:n+1]
@@ -321,6 +324,10 @@ def genetic_optimization_with_linearization(alfa, xl, yl, xr, yr, solutions_numb
 
         if best_resoult_fit < min_fit:
             break
+
+        self.alfa = best_solutions[0, :]
+        if i > 0:
+            self._plot()
 
         # generacja nowej populacji - mutajcje
         new_population = np.zeros_like(my_population)
