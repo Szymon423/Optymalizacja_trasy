@@ -121,7 +121,7 @@ class GUI:
                 # realizacja algorytmyu genetycznego
                 population_size = 100
                 epochs = 100
-                min_fit = 1500
+                min_fit = 900
                 optim_alfa = mGA.genetic_optimization(self,
                                                       alfa,
                                                       Xl_smoth, Yl_smoth,

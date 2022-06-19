@@ -196,6 +196,8 @@ def generate_population_linearized(edg, sol_num, n):
 # interpolacja liniowa pomiędzy dwoma punktami
 def linear_connection(start, end, pos, rising):
     len_ = end - start
+    if len_ < 0:
+        len_ = 0
     line = np.zeros(len_)
     if pos == 1:
         start_val = 0.5
@@ -208,7 +210,6 @@ def linear_connection(start, end, pos, rising):
     else:
         start_val = int(not rising)
         stop_val = 0.5
-
 
     for i in range(len_):
         line[i] = start_val + (stop_val - start_val) / len_ * (i + 1)
@@ -251,7 +252,11 @@ def mutate_linear(to_change):
         a = 5
         if x == 0:
             beginning = start[x]
-            ending = end[x] + random.randint(-a, a)
+            fsd = random.randint(-a, a)
+            if beginning >= end[x] + fsd:
+                ending = end[x]
+            else:
+                ending = end[x] + fsd
             # print(beginning, ending)
             subject[beginning: ending] = linear_connection(beginning, ending, 1, rising)
 
@@ -265,18 +270,21 @@ def mutate_linear(to_change):
             subject[beginning: ending] = linear_connection(beginning, ending, 3, rising)
 
         else:
-            beginning = start[x] + random.randint(-a, a)
-            ending = end[x] + random.randint(-a, a)
+            hh = random.randint(-a, a)
+            jj = random.randint(-a, a)
 
-            if beginning > ending:
+            beginning = start[x]
+            ending = end[x]
+
+            if start[x] + hh > end[x] + jj:
                 beginning = start[x] + random.randint(-a, 0)
                 ending = end[x] + random.randint(0, a)
 
-            if ending < end[x]:
-                subject[ending: end[x]] = int(rising)
+            if end[x] + jj < end[x]:
+                subject[end[x] + jj: end[x]] = int(rising)
 
-            if beginning > start[x]:
-                subject[start[x]: beginning] = int(not rising)
+            if start[x] + hh > start[x]:
+                subject[start[x]: start[x] + hh] = int(not rising)
 
             # print(beginning, ending)
             subject[beginning: ending] = linear_connection(beginning, ending, 2, rising)
